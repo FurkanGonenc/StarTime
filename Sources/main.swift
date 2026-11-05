@@ -215,19 +215,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     // MARK: Menu bar
 
-    /// Shows stars in the menu bar only while running and the window isn't visible on the current desktop.
+    /// Shows the menu bar item only when the window isn't visible on the current desktop.
     @objc private func refreshMenuBar() {
-        guard isSessionOpen, isRunning, let w = window else { removeStatusItem(); return }
+        guard isSessionOpen, let w = window else { removeStatusItem(); return }
         let visibleHere = w.isVisible && !w.isMiniaturized && w.isOnActiveSpace
         if visibleHere {
             removeStatusItem()
-        } else if statusItem == nil {
+            return
+        }
+        if statusItem == nil {
             let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
             item.button?.font = .monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
-            // Masked on purpose: shows that it's running, never the actual time.
-            item.button?.title = "**:**:**"
             statusItem = item
         }
+        // Masked while running so the ticking clock doesn't distract; the real time shows when paused.
+        let title = isRunning ? "**:**:**" : formatted(elapsed)
+        if statusItem?.button?.title != title { statusItem?.button?.title = title }
     }
 
     private func removeStatusItem() {
