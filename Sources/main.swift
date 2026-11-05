@@ -157,7 +157,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         label?.stringValue = text
         label?.textColor = isRunning ? .labelColor : .secondaryLabelColor
         refreshMenuBar()
-        statusItem?.button?.appearsDisabled = !isRunning
     }
 
     // MARK: Window
@@ -216,18 +215,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     // MARK: Menu bar
 
-    /// Shows the time in the menu bar only when the window isn't visible on the current desktop.
+    /// Shows stars in the menu bar only while running and the window isn't visible on the current desktop.
     @objc private func refreshMenuBar() {
-        guard isSessionOpen, let w = window else { removeStatusItem(); return }
+        guard isSessionOpen, isRunning, let w = window else { removeStatusItem(); return }
         let visibleHere = w.isVisible && !w.isMiniaturized && w.isOnActiveSpace
         if visibleHere {
             removeStatusItem()
         } else if statusItem == nil {
             let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
             item.button?.font = .monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
-            // Masked on purpose: only running/paused shows here, never the actual time.
+            // Masked on purpose: shows that it's running, never the actual time.
             item.button?.title = "**:**:**"
-            item.button?.appearsDisabled = !isRunning
             statusItem = item
         }
     }
